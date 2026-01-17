@@ -1,0 +1,64 @@
+1️⃣ Auth Service (PostgreSQL)
+User signup / login
+
+JWT + refresh tokens
+
+Roles: user, admin
+
+PostgreSQL tables:
+
+users
+
+roles
+
+refresh_tokens
+
+2️⃣ Product Service (MongoDB)
+
+Product catalog
+
+Categories
+
+Product search
+
+MongoDB collections:
+
+products
+
+categories
+
+3️⃣ Order Service (PostgreSQL)
+
+Create orders
+
+Order status tracking
+
+Transactions
+
+Tables:
+
+orders
+
+order_items
+
+4️⃣ Payment Service (MongoDB)
+
+Payment records
+
+Stripe/Razorpay simulation
+
+Collections:
+
+payments
+
+🖥 Frontend (React + Tailwind)
+
+Product listing
+
+Cart
+
+Checkout
+
+Admin dashboard
+
+Order tracking
