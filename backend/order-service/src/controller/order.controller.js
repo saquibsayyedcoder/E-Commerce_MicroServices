@@ -73,10 +73,51 @@ export const allOrders = async (req, res) => {
 export const updateStatus = async (req, res) => {
   const { status } = req.body;
 
-  const order = await prisma.order.update({
-    where: { id: Number(req.params.id) },
+  const order = await prisma.order.findUnique({
+    where: { id: Number(req.params.id) }
+  });
+
+  if (order.status === "DELIVERED") {
+    return res.status(400).json({
+      message: "Delivered orders cannot be updated"
+    });
+  }
+
+  const updated = await prisma.order.update({
+    where: { id: order.id },
     data: { status }
   });
 
-  res.json(order);
+  res.json(updated);
 };
+
+//cancel order
+export const cancelOrder = async (req, res) => {
+  const order = await prisma.order.findUnique({
+    where: { id: Number(req.params.id) },
+    include: { items: true }
+  });
+
+  if (!order || order.status !== "PENDING") {
+    return res.status(400).json({
+      message: "Order cannot be cancelled"
+    });
+  }
+
+  // Restore stock
+  for (const item of order.items) {
+    await axios.put(
+      `${process.env.PRODUCT_SERVICE_URL}/api/products/restore-stock/${item.productId}`,
+      { quantity: item.quantity },
+      { headers: { Authorization: req.headers.authorization } }
+    );
+  }
+
+  await prisma.order.update({
+    where: { id: order.id },
+    data: { status: "CANCELLED" }
+  });
+
+  res.json({ message: "Order cancelled & stock restored" });
+};
+
