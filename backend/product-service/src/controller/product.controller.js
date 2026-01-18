@@ -56,3 +56,13 @@ export const reduceStock = async (req, res) => {
 
   res.json({ message: "Stock updated" });
 };
+
+export const restoreStock = async (req, res) => {
+  const { quantity } = req.body;
+  const product = await Product.findById(req.params.id);
+
+  product.stock += quantity;
+  await product.save();
+
+  res.json({ message: "Stock restored" });
+};
