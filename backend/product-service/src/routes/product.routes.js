@@ -1,5 +1,5 @@
 import express from "express";
-import { createProduct, deleteProduct, getProductById, getProducts, reduceStock, updateProduct } from "../controller/product.controller.js";
+import { createProduct, deleteProduct, getProductById, getProducts, reduceStock, restoreStock, updateProduct } from "../controller/product.controller.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
 
 
@@ -18,6 +18,7 @@ router.put(
   authorize(["ADMIN"]),
   reduceStock
 );
+router.put("/restore-stock/:id", authenticate, authorize(["ADMIN"]), restoreStock);
 
 
 export default router;
