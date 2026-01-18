@@ -40,3 +40,29 @@ export const deleteProduct = async (req, res) => {
   await Product.findByIdAndDelete(req.params.id);
   res.json({ message: "Product deleted" });
 };
+
+//reduce stock
+export const reduceStock = async (req, res) => {
+  const { quantity } = req.body;
+
+  const product = await Product.findById(req.params.id);
+
+  if (!product || product.stock < quantity) {
+    return res.status(400).json({ message: "Insufficient stock" });
+  }
+
+  product.stock -= quantity;
+  await product.save();
+
+  res.json({ message: "Stock updated" });
+};
+
+export const restoreStock = async (req, res) => {
+  const { quantity } = req.body;
+  const product = await Product.findById(req.params.id);
+
+  product.stock += quantity;
+  await product.save();
+
+  res.json({ message: "Stock restored" });
+};
