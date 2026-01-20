@@ -1,37 +1,42 @@
 import Payment from "../models/payment.model.js"
 import axios from "axios";
+import { getChannel } from "../utils/rabbitmq.js";
+
 
 // CREATE PAYMENT
+
 export const createPayment = async (req, res) => {
   try {
     const { orderId, amount } = req.body;
 
+    // save payment (MongoDB)
     const payment = await Payment.create({
       orderId,
       userId: req.user.id,
       amount,
-      status: "SUCCESS" // simulate success
+      status: "SUCCESS"
     });
 
-    // 🔁 Notify Order Service
-    await axios.put(
-      `${process.env.ORDER_SERVICE_URL}/api/orders/pay/${orderId}`,
-      {},
-      {
-        headers: {
-          Authorization: req.headers.authorization
-        }
-      }
+    // 🔥 publish event
+    const channel = getChannel();
+    channel.assertQueue("ORDER_PAID");
+
+    channel.sendToQueue(
+      "ORDER_PAID",
+      Buffer.from(
+        JSON.stringify({
+          orderId,
+          userId: req.user.id
+        })
+      )
     );
 
-    res.status(201).json({
-      message: "Payment successful",
-      payment
-    });
+    res.json({ message: "Payment successful", payment });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 export const refundPayment = async (req, res) => {
   try {

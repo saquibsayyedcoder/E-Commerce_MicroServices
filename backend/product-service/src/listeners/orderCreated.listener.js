@@ -1,0 +1,27 @@
+import { getChannel } from "../utils/rabbitmq.js";
+import Product from "../models/product.model.js";
+
+export const orderCreatedListener = async () => {
+  const channel = getChannel();
+
+  if (!channel) throw new Error("RabbitMQ channel not ready");
+
+  await channel.assertQueue("ORDER_CREATED");
+
+  channel.consume("ORDER_CREATED", async (msg) => {
+    const { items } = JSON.parse(msg.content.toString());
+
+    console.log("ORDER_CREATED event received");
+
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+
+      if (product) {
+        product.stock -= item.quantity;
+        await product.save();
+      }
+    }
+
+    channel.ack(msg);
+  });
+};
