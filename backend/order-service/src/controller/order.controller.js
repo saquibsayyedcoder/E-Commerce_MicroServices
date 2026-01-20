@@ -21,17 +21,18 @@ export const createOrder = async (req, res) => {
       item.price = product.price;
       total += product.price * item.quantity;
     }
-    for (const item of items) {
+for (const item of items) {
   await axios.put(
     `${process.env.PRODUCT_SERVICE_URL}/api/products/reduce-stock/${item.productId}`,
     { quantity: item.quantity },
     {
       headers: {
-        Authorization: req.headers.authorization
+        Authorization: `Bearer ${process.env.SERVICE_TOKEN}`
       }
     }
   );
 }
+
 
 
     const order = await prisma.order.create({
