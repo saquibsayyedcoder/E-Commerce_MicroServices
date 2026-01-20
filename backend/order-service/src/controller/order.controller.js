@@ -129,3 +129,22 @@ export const cancelOrder = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const markOrderPaid = async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+
+    const order = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "PAID" }
+    });
+
+    res.json({
+      message: "Order marked as PAID",
+      order
+    });
+  } catch (error) {
+    console.error("MARK PAID ERROR:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};

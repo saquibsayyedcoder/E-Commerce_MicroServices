@@ -1,0 +1,6 @@
+export const ORDER_STATUS = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  CANCELLED: "CANCELLED",
+  REFUNDED: "REFUNDED"
+};
