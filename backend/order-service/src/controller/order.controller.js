@@ -81,3 +81,51 @@ export const updateStatus = async (req, res) => {
 
   res.json(order);
 };
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true }
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // USER can cancel only his own order
+    if (req.user.role !== "ADMIN" && order.userId !== req.user.id) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Prevent double cancel
+    if (order.status === "CANCELLED") {
+      return res.status(400).json({ message: "Order already cancelled" });
+    }
+
+    // Restore stock
+    for (const item of order.items) {
+      await axios.put(
+        `${process.env.PRODUCT_SERVICE_URL}/api/products/restore-stock/${item.productId}`,
+        { quantity: item.quantity },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.SERVICE_TOKEN}`
+          }
+        }
+      );
+    }
+
+    // Update order status
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "CANCELLED" }
+    });
+
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
