@@ -2,8 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "../src/routes/auth.routes.js";
+import { connectRabbitMQ } from "./utils/rabbitmq.js";
 
 dotenv.config();
+connectRabbitMQ();
 const app = express();
 app.use(cors());
 app.use(express.json());
