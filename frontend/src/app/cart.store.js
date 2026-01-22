@@ -1,0 +1,13 @@
+// features/products/product.queries.js
+import { useQuery } from "@tanstack/react-query";
+import api from "../../api/axios";
+
+export const useProducts = () => {
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const res = await api.get("/products/get-all");
+      return res.data;
+    },
+  });
+};
