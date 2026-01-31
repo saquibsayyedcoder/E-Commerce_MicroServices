@@ -8,10 +8,14 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import AdminProducts from "@/pages/admin/AdminPorducts";
 import AdminOrders from "@/pages/admin/AdminOrders";
+import CreateProduct from "@/pages/admin/CreateProducts";
+import EditProduct from "@/pages/admin/EditProduct";
+import { ToastContainer } from "react-toastify";
 
 
 const AppRoutes = () => {
   return (
+   <>
     <Routes>
       {/* 🌍 Public */}
       <Route path="/" element={<Home />} />
@@ -29,19 +33,28 @@ const AppRoutes = () => {
       />
 
      {/* 🛡️ Admin Protected (Nested) */}
-      <Route
-        path="/admin"
-        element={
-          <AdminGuard>
-            <AdminLayout />
-          </AdminGuard>
-        }
-      >
-        <Route index element={<AdminDashboard />} />
-        <Route path="products" element={<AdminProducts />} />
-        <Route path="orders" element={<AdminOrders />} />
-      </Route>
+    <Route
+  path="/admin"
+  element={
+    <AdminGuard>
+      <AdminLayout />
+    </AdminGuard>
+  }
+>
+  <Route index element={<AdminDashboard />} />
+  <Route path="products" element={<AdminProducts />} />
+  <Route path="products/create" element={<CreateProduct />} />
+  <Route
+  path="/admin/products/edit/:id"
+  element={<EditProduct />}
+/>
+
+</Route>
+
     </Routes>
+    <ToastContainer/>
+   </>
+  
   );
 };
 
