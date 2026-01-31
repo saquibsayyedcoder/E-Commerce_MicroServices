@@ -1,19 +1,30 @@
 import { loginUser } from "@/api/auth.api";
 import AuthLayout from "@/components/Layout/AuthLayout";
-import { loginSuccess } from "@/features/auth/authSclice";
-
+import { loginStart, loginSuccess, loginFailure } from "@/features/auth/authSclice";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
 import { useMutation } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { token, user } = useSelector((state) => state.auth);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (token && user) {
+      const role = user?.role;
+      if (role === "ADMIN") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    }
+  }, [token, user, navigate]);
 
   const [form, setForm] = useState({
     email: "",
@@ -22,59 +33,57 @@ export default function Login() {
 
   const mutation = useMutation({
     mutationFn: loginUser,
+    onMutate: () => {
+      dispatch(loginStart());
+    },
     onSuccess: (data) => {
-      // Save auth to redux
       dispatch(loginSuccess(data));
-
-      // 🔀 Redirect based on role
-      if (data.user.role === "ADMIN") {
-        navigate("/admin");
+      
+      // Navigate based on role
+      const role = data?.user?.role;
+      if (role === "ADMIN") {
+        navigate("/admin", { replace: true });
       } else {
-        navigate("/");
+        navigate("/", { replace: true });
       }
     },
+    onError: (error) => {
+      dispatch(loginFailure(error.response?.data?.message || "Login failed"));
+    }
   });
 
   const submitHandler = (e) => {
     e.preventDefault();
-    mutation.mutate(form); // ✅ only once
+    mutation.mutate(form);
   };
 
   return (
     <AuthLayout title="Login">
       <form onSubmit={submitHandler} className="space-y-4">
-        {/* Email */}
         <div>
           <Label>Email</Label>
           <Input
             type="email"
             value={form.email}
-            onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
             required
           />
         </div>
 
-        {/* Password */}
         <div>
           <Label>Password</Label>
           <Input
             type="password"
             value={form.password}
-            onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
           />
         </div>
 
-        {/* Button */}
         <Button className="w-full" disabled={mutation.isPending}>
           {mutation.isPending ? "Logging in..." : "Login"}
         </Button>
 
-        {/* Error */}
         {mutation.isError && (
           <p className="text-red-500 text-sm text-center">
             {mutation.error.response?.data?.message || "Login failed"}

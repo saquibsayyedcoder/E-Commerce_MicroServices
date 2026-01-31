@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors"
 import orderRoutes from "./routes/order.routes.js";
 import { connectRabbitMQ } from "./utils/rabbitmq.js";
 import { orderPaidListener } from "./listeners/orderPaid.listener.js";
