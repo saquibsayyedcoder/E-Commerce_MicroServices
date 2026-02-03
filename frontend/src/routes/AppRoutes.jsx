@@ -13,6 +13,7 @@ import EditProduct from "@/pages/admin/EditProduct";
 import { ToastContainer } from "react-toastify";
 
 
+
 const AppRoutes = () => {
   return (
    <>
@@ -48,7 +49,7 @@ const AppRoutes = () => {
   path="/admin/products/edit/:id"
   element={<EditProduct />}
 />
-
+<Route path="orders" element={<AdminOrders/>} />
 </Route>
 
     </Routes>
