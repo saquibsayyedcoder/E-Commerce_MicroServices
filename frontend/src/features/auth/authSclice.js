@@ -1,21 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Helper function to safely parse JSON from localStorage
-const getStoredUser = () => {
-  try {
-    const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
-  } catch (error) {
-    console.error("Error parsing user from localStorage:", error);
-    localStorage.removeItem("user"); // Clear invalid data
-    return null;
-  }
-};
-
 const initialState = {
-  user: getStoredUser(), // Use the safe helper function
   token: localStorage.getItem("token") || null,
-  isLoading: false,
+  user: JSON.parse(localStorage.getItem("user")) || null,
+  loading: false,
   error: null,
 };
 
@@ -24,52 +12,27 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginStart: (state) => {
-      state.isLoading = true;
+      state.loading = true;
       state.error = null;
     },
     loginSuccess: (state, action) => {
-      state.isLoading = false;
-      state.user = action.payload.user;
+      state.loading = false;
       state.token = action.payload.token;
-      
-      try {
-        // Store in localStorage
-        localStorage.setItem("token", action.payload.token);
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
-      } catch (error) {
-        console.error("Error saving to localStorage:", error);
-      }
+      state.user = action.payload.user;
     },
     loginFailure: (state, action) => {
-      state.isLoading = false;
+      state.loading = false;
       state.error = action.payload;
     },
     logout: (state) => {
-      state.user = null;
       state.token = null;
-      state.error = null;
-      
-      // Clear localStorage
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      state.user = null;
+      localStorage.clear();
     },
-    updateUser: (state, action) => {
-      state.user = { ...state.user, ...action.payload };
-      try {
-        localStorage.setItem("user", JSON.stringify(state.user));
-      } catch (error) {
-        console.error("Error updating user in localStorage:", error);
-      }
-    }
   },
 });
 
-export const { 
-  loginStart, 
-  loginSuccess, 
-  loginFailure, 
-  logout, 
-  updateUser 
-} = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout } =
+  authSlice.actions;
 
 export default authSlice.reducer;

@@ -16,17 +16,17 @@ export const myOrdersApi = async () => {
 
 // ADMIN: ALL ORDERS
 export const allOrdersApi = async () => {
-  const res = await api.get(`${ORDER_URL}/orders/all-orders`);
-  return res.data; // ✅
+  const res = await api.get(`${ORDER_URL}/all-orders`);
+  return res.data;
 };
 
 // ADMIN: UPDATE STATUS
 export const updateOrderStatusApi = async ({ id, status }) => {
   const res = await api.put(
-    `${ORDER_URL}/orders/update/${id}/status`,
+    `${ORDER_URL}/update/${id}/status`,
     { status }
   );
-  return res.data; // ✅
+  return res.data;
 };
 
 // USER: CANCEL ORDER

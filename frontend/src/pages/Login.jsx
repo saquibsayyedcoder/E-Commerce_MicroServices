@@ -1,35 +1,35 @@
-import { loginUser } from "@/api/auth.api";
-import AuthLayout from "@/components/Layout/AuthLayout";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
+import { Navigate, useNavigate } from "react-router-dom";
+
 import { loginStart, loginSuccess, loginFailure } from "@/features/auth/authSclice";
+import { loginUser } from "@/api/auth.api";
+
+import AuthLayout from "@/components/Layout/AuthLayout";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useMutation } from "@tanstack/react-query";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token, user } = useSelector((state) => state.auth);
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (token && user) {
-      const role = user?.role;
-      if (role === "ADMIN") {
-        navigate("/admin", { replace: true });
-      } else {
-        navigate("/", { replace: true });
-      }
-    }
-  }, [token, user, navigate]);
-
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+
+  // 🔒 If already logged in → redirect
+  if (token && user) {
+    return (
+      <Navigate
+        to={user.role === "ADMIN" ? "/admin" : "/"}
+        replace
+      />
+    );
+  }
 
   const mutation = useMutation({
     mutationFn: loginUser,
@@ -38,18 +38,23 @@ export default function Login() {
     },
     onSuccess: (data) => {
       dispatch(loginSuccess(data));
-      
-      // Navigate based on role
-      const role = data?.user?.role;
-      if (role === "ADMIN") {
-        navigate("/admin", { replace: true });
-      } else {
-        navigate("/", { replace: true });
-      }
+
+      // Save token locally (important)
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Redirect after login
+      navigate(data.user.role === "ADMIN" ? "/admin" : "/", {
+        replace: true,
+      });
     },
     onError: (error) => {
-      dispatch(loginFailure(error.response?.data?.message || "Login failed"));
-    }
+      dispatch(
+        loginFailure(
+          error?.response?.data?.message || "Login failed"
+        )
+      );
+    },
   });
 
   const submitHandler = (e) => {
@@ -60,33 +65,46 @@ export default function Login() {
   return (
     <AuthLayout title="Login">
       <form onSubmit={submitHandler} className="space-y-4">
+        {/* Email */}
         <div>
           <Label>Email</Label>
           <Input
             type="email"
             value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
+            }
             required
           />
         </div>
 
+        {/* Password */}
         <div>
           <Label>Password</Label>
           <Input
             type="password"
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
             required
           />
         </div>
 
-        <Button className="w-full" disabled={mutation.isPending}>
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={mutation.isPending}
+        >
           {mutation.isPending ? "Logging in..." : "Login"}
         </Button>
 
+        {/* Error Message */}
         {mutation.isError && (
           <p className="text-red-500 text-sm text-center">
-            {mutation.error.response?.data?.message || "Login failed"}
+            {mutation.error?.response?.data?.message ||
+              "Invalid email or password"}
           </p>
         )}
       </form>

@@ -5,13 +5,16 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import store from "./app/store";
 import { queryClient } from "./app/queryClient";
 import AppRoutes from "./routes/AppRoutes";
+import AppInitializer from "./AppInitializer";
 
 function App() {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <AppRoutes />
+      <AppInitializer>
+            <AppRoutes />
+      </AppInitializer>
         </BrowserRouter>
       </QueryClientProvider>
     </Provider>
