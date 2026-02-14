@@ -11,16 +11,20 @@ import AdminOrders from "@/pages/admin/AdminOrders";
 import CreateProduct from "@/pages/admin/CreateProducts";
 import EditProduct from "@/pages/admin/EditProduct";
 import { ToastContainer } from "react-toastify";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import Register from "@/pages/Register";
 
 
 
 const AppRoutes = () => {
   return (
    <>
-    <Routes>
+  <ErrorBoundary>
+      <Routes>
       {/* 🌍 Public */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+       <Route path="/register" element={<Register />} />
       <Route path="/products" element={<Products />} />
 
       {/* 🔐 User Protected */}
@@ -53,6 +57,7 @@ const AppRoutes = () => {
 </Route>
 
     </Routes>
+  </ErrorBoundary>
     <ToastContainer/>
    </>
   
